@@ -1,13 +1,200 @@
+/* myapp4/src/index.css */
 body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background-color: #0d2c1c; /* Dark green felt color */
+    color: #fff;
+    text-align: center;
+    padding-top: 50px;
 }
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+.blackjack-container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 30px;
+    border-radius: 15px;
+    background-color: #1a4f32; /* Slightly lighter felt */
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+}
+
+h1 {
+    font-size: 2.5em;
+    color: #ffcc00; /* Gold color for heading */
+    margin-bottom: 20px;
+}
+
+h2 {
+    font-size: 1.5em;
+    margin-top: 30px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    padding-bottom: 10px;
+}
+
+hr {
+    border: 0;
+    height: 1px;
+    background-image: linear-gradient(to right, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0));
+    margin: 30px 0;
+}
+
+/* myapp4/src/index.css (Add to the file above) */
+
+.actions button {
+    padding: 10px 20px;
+    margin: 5px;
+    border: none;
+    border-radius: 5px;
+    font-size: 1em;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.2s, transform 0.1s;
+}
+
+/* Specific styling for the Hit button */
+.actions button:nth-child(2) { 
+    background-color: #007bff; /* Blue */
+    color: white;
+}
+.actions button:nth-child(2):hover:not(:disabled) {
+    background-color: #0056b3;
+    transform: translateY(-2px);
+}
+
+/* Specific styling for the Stand button */
+.actions button:nth-child(3) { 
+    background-color: #28a745; /* Green */
+    color: white;
+}
+.actions button:nth-child(3):hover:not(:disabled) {
+    background-color: #1e7e34;
+    transform: translateY(-2px);
+}
+
+/* Disabled State */
+.actions button:disabled {
+    background-color: #555;
+    color: #bbb;
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+/* myapp4/src/index.css (Add to the file above) */
+
+.card-tile {
+    display: inline-block;
+    width: 40px;
+    height: 60px;
+    line-height: 60px;
+    text-align: center;
+    background-color: white;
+    color: black;
+    border: 1px solid #333;
+    border-radius: 5px;
+    margin: 0 5px;
+    font-size: 1.2em;
+    font-weight: bold;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.4);
+}
+
+/* Style for the hidden dealer card */
+.card-tile:has(span:only-child) { /* Targets the hidden '?' card */
+    background-color: #555;
+    color: white;
+}
+
+/* Style for the outcome message */
+.blackjack-container > p:first-child {
+    font-size: 1.8em;
+    font-weight: 900;
+    color: #ff0000; /* Red for emphasis */
+    padding: 10px;
+}
+
+/* myapp4/src/index.css (Add these styles) */
+
+/* Base style for card tiles (ensure it's positioned for animation) */
+.card-tile {
+    /* ... existing card-tile styles ... */
+    position: relative; /* Essential for 'transform' animation */
+    /* Add a transition for smooth changes, like when changing its color or size */
+    transition: all 0.3s ease-out; 
+    opacity: 1; /* Default visible state */
+}
+
+/* Animation for a newly drawn card */
+.card-drawn-animation {
+    animation: slideInCard 0.5s ease-out forwards;
+}
+
+@keyframes slideInCard {
+    from {
+        opacity: 0;
+        transform: translateX(50px) scale(0.8); /* Start off-screen right, slightly smaller */
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0) scale(1); /* End in its normal position */
+    }
+}
+
+/* You might want a subtle animation for the overall message change too */
+.blackjack-container > p:nth-child(2) {
+    /* ... existing message styles ... */
+    animation: fadeInMessage 0.8s ease-out;
+}
+
+@keyframes fadeInMessage {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* myapp4/src/index.css (Add these styles) */
+
+/* Style for the Win Burst container */
+.win-burst {
+    position: absolute; /* Position it relative to the container */
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 100;
+    font-size: 3em;
+    font-weight: 900;
+    color: #ffcc00; /* Gold */
+    background-color: rgba(0, 0, 0, 0.7);
+    padding: 20px 40px;
+    border-radius: 10px;
+    border: 5px solid #ff00ff; /* Pink border */
+    box-shadow: 0 0 30px #ff00ff;
+    
+    /* Apply the animation */
+    animation: burstPop 1.5s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
+}
+
+/* IMPORTANT: Ensure the parent container can position the burst correctly */
+.blackjack-container {
+    /* ... existing styles ... */
+    position: relative; /* REQUIRED */
+    overflow: hidden; /* Keeps the animation within the container bounds */
+}
+
+
+@keyframes burstPop {
+    0% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.1) rotate(0deg);
+    }
+    50% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1.1) rotate(5deg);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(1.5) rotate(-5deg);
+    }
 }
