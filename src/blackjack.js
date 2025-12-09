@@ -1,28 +1,41 @@
-import React, { useState } from 'react';
-import { getRandomCard } from './utils/cardLogic'; // Import the function
+import React, { useState, useEffect } from 'react';
+import chipImage from ".//assets/casino11.png"
+
+
+import { getRandomCard } from './utils/cardLogic'; 
+// NOTE: Ensure './utils/cardLogic' exports a function called getRandomCard()
+// that returns the numerical value of a drawn card (e.g., 2-11).
+
+// Define the chip values available for betting
+const CHIP_VALUES = [1, 10, 100, 500];
 
 function Blackjack() {
     // --- STATE MANAGEMENT ---
     // Player State
     const [playerCards, setPlayerCards] = useState([]);
     const [playerSum, setPlayerSum] = useState(0);
-    const [playerChips, setPlayerChips] = useState(200);
-
+    const [playerChips, setPlayerChips] = useState(2000); // Increased starting chips
+    
     // Dealer State
     const [dealerCards, setDealerCards] = useState([]);
     const [dealerSum, setDealerSum] = useState(0);
 
     // Game State
-    const [isGameActive, setIsGameActive] = useState(false); // Replaces isAlive
-    const [message, setMessage] = useState("Want to play a round?");
-    const [betAmount, setBetAmount] = useState(10); // Simple betting
-    const [lastDrawnCardIndex, setLastDrawnCardIndex] = useState(-1); // Index of the last card to animate
-// ...
+    const [isGameActive, setIsGameActive] = useState(false);
+    const [betAmount, setBetAmount] = useState(0);
+    const [message, setMessage] = useState("Place Your Bets");
+    
+    // UI/Flow State
+    const [isBettingPhase, setIsBettingPhase] = useState(true); 
+    const [chipsOnTable, setChipsOnTable] = useState([]); // Array to store chip values placed
+    const [lastDrawnCardIndex, setLastDrawnCardIndex] = useState(-1);
     const [isWinBurstActive, setIsWinBurstActive] = useState(false);
+    const [isLossShakeActive, setIsLossShakeActive] = useState(false);
+
 
     // --- HELPER FUNCTIONS ---
 
-    // New: Checks for Ace conversion (11 -> 1) to prevent bust
+    // Checks for Ace conversion (11 -> 1) to prevent bust
     const calculateSum = (cards) => {
         let sum = cards.reduce((acc, card) => acc + card, 0);
         let numAces = cards.filter(card => card === 11).length;
@@ -35,14 +48,42 @@ function Blackjack() {
         return sum;
     };
     
+    // --- BETTING LOGIC ---
+
+    // Handles clicking a chip from the tray
+    const handleChipClick = (value) => {
+        if (!isBettingPhase) return;
+
+        // Check against the player's total chips
+        if (playerChips >= betAmount + value) {
+            setBetAmount(prev => prev + value);
+            // Add chip value to the display array
+            setChipsOnTable(prev => [...prev, value]); 
+            setMessage(`Current Bet: $${betAmount + value}`);
+        } else {
+            setMessage(`Insufficient chips. Max bet is $${playerChips}.`);
+        }
+    };
+
+    // Clears the current bet (by clicking the chips on the table)
+    const clearBet = () => {
+        if (isBettingPhase) {
+            setBetAmount(0);
+            setChipsOnTable([]);
+            setMessage("Bet cleared. Place Your Bets");
+        }
+    };
+
     // --- GAME LOGIC ---
 
-    const startGame = () => {
-        if (playerChips < betAmount) {
-            setMessage("You don't have enough chips to bet.");
+    // Starts the game using the current betAmount
+    const handleDeal = () => {
+        if (betAmount === 0 || !isBettingPhase) {
+            setMessage("You must place a bet to deal!");
             return;
         }
 
+        setIsBettingPhase(false);
         setIsGameActive(true);
         setMessage("Drawing cards...");
 
@@ -51,12 +92,9 @@ function Blackjack() {
         const newPlayerSum = calculateSum(newPlayerCards);
         setPlayerCards(newPlayerCards);
         setPlayerSum(newPlayerSum);
-        
-        setPlayerCards(newPlayerCards);
-        setPlayerSum(newPlayerSum);
         setLastDrawnCardIndex(newPlayerCards.length - 1);
 
-        // Dealer's initial draw (only one visible card)
+        // Dealer's initial draw (one card hidden)
         const newDealerCards = [getRandomCard(), getRandomCard()];
         const newDealerSum = calculateSum(newDealerCards);
         setDealerCards(newDealerCards);
@@ -64,9 +102,10 @@ function Blackjack() {
 
         // Check for immediate Blackjack
         if (newPlayerSum === 21) {
-            checkFinalWinner(newPlayerSum, newDealerSum, newPlayerCards, newDealerCards);
+            // Player Blackjack - check dealer's second card immediately
+            stand(newPlayerCards, newPlayerSum, newDealerCards, newDealerSum);
         } else {
-            setMessage("Do you want to Hit or Stand?");
+            setMessage("Hit, Stand, or Double Down?");
         }
     };
 
@@ -85,20 +124,23 @@ function Blackjack() {
             setMessage("Bust! You are out of the game.");
             setIsGameActive(false);
             setPlayerChips(prev => prev - betAmount);
+            checkFinalWinner(newSum, dealerSum); // Handles chips/reset
         } else if (newSum === 21) {
-             // If player hits 21, automatically stand and start dealer turn
-             stand(updatedCards, newSum); 
+             // If player hits 21, automatically stand
+             stand(updatedCards, newSum);
         }
     };
 
-    const stand = (finalPlayerCards = playerCards, finalPlayerSum = playerSum) => {
-        if (!isGameActive) return;
-
+    const stand = (finalPlayerCards = playerCards, finalPlayerSum = playerSum, initialDealerCards = dealerCards, initialDealerSum = dealerSum) => {
+        if (!isGameActive && finalPlayerSum < 21) return;
+        
+        // Disable game actions
         setIsGameActive(false);
+        setMessage("Dealer is playing...");
 
         // 1. Dealer's Turn Logic
-        let currentDealerCards = [...dealerCards];
-        let currentDealerSum = dealerSum;
+        let currentDealerCards = [...initialDealerCards];
+        let currentDealerSum = initialDealerSum;
 
         // Dealer must hit until sum is 17 or more
         while (currentDealerSum < 17) {
@@ -117,8 +159,10 @@ function Blackjack() {
    const checkFinalWinner = (pSum, dSum) => {
     let finalMessage = "";
     let newChips = playerChips;
-    let playerWon = false; // New flag to easily check for win
+    let playerWon = false;
+    let isPush = false;
 
+    // Logic to calculate win/loss
     if (pSum > 21) {
         finalMessage = "Bust! Dealer Wins.";
         newChips -= betAmount;
@@ -135,75 +179,136 @@ function Blackjack() {
         newChips -= betAmount;
     } else {
         finalMessage = "It's a Push (Tie)! Bet returned.";
+        isPush = true;
     }
 
     setMessage(finalMessage);
     setPlayerChips(newChips);
 
-    // --- NEW ANIMATION LOGIC ---
+    // --- ANIMATION LOGIC ---
     if (playerWon) {
         setIsWinBurstActive(true);
-        // Hide the burst animation after 1.5 seconds
-        setTimeout(() => {
-            setIsWinBurstActive(false);
-        }, 1500);
+        setTimeout(() => { setIsWinBurstActive(false); }, 1500);
+    } else if (!isPush) {
+        setIsLossShakeActive(true);
+        setTimeout(() => { setIsLossShakeActive(false); }, 1500);
     }
-    // --- END NEW ANIMATION LOGIC ---
+
+    // --- Reset for Next Round ---
+    // Delay the transition back to betting phase to let the user see results
+    setTimeout(() => {
+        setBetAmount(0);
+        setChipsOnTable([]);
+        setPlayerCards([]);
+        setDealerCards([]);
+        setIsBettingPhase(true);
+        setMessage("Place Your Bets");
+    }, 3000); 
 };
+
 
     // --- RENDER/JSX ---
     return (
         <div className="blackjack-container">
-            <h1>React Blackjack</h1>
-            
-            {/* Player Info */}
-            {/* --- NEW: Party Burst Element --- */}
-    {isWinBurstActive && (
-        <div className="win-burst">
-            🎉 {message} 🎉
-        </div>
-    )}
-            <p>
-                **Player: Per** | Chips: **${playerChips}** | Current Bet: ${betAmount}
-            </p>
+            <div className="table-top">
+                <h1 className="logo"> BLACKJACK</h1>
+            </div>
 
-            {/* Dealer Display */}
-           // Dealer Display (Updated)
-<div className="hand-display">
-    <h2>Dealer's Hand (Sum: {isGameActive ? '?' : dealerSum})</h2>
-    <p>Cards: {dealerCards.map((card, index) => (
-        <span key={index} className="card-tile">
-            {isGameActive && index === 1 ? '?' : card} 
-        </span>
-    ))}</p>
-</div>
-            <hr/>
+            {/* DEALER HAND AND SUM */}
+            <div className="dealer-area">
+                <div className="sum-display">{isGameActive ? '?' : dealerSum}</div>
+                <div className="hand-display dealer-hand">
+                    {dealerCards.map((card, index) => (
+                        <div key={index} className="card-tile">
+                            {/* Hide second card during active game */}
+                            {isGameActive && index === 1 ? '?' : card} 
+                        </div>
+                    ))}
+                </div>
+            </div>
 
-            {/* Player Display */}
-          // Player Display (Updated)
-<div className="hand-display">
-    <h2>Your Hand (Sum: {playerSum})</h2>
-    <p>Cards: {playerCards.map((card, index) => (
-    <span 
-        key={index} 
-        className={`card-tile ${index === lastDrawnCardIndex ? 'card-drawn-animation' : ''}`}
-    >
-        {card}
-    </span>
-))}</p>
+            {/* PLAYER HAND AND SUM */}
+            <div className="player-area">
+                <div className="sum-display">{playerSum}</div>
+                <div className="hand-display player-hand">
+                    {playerCards.map((card, index) => (
+                        <div 
+                            key={index} 
+                            className={`card-tile ${index === lastDrawnCardIndex ? 'card-drawn-animation' : ''}`}
+                        >
+                            {card}
+                        </div>
+                    ))}
+                </div>
+            </div>
+
+            {/* CENTER BETTING/MESSAGING AREA */}
+            <div className="center-table-actions">
+                {/* Win/Loss Animation Overlays */}
+                {isWinBurstActive && <div className="win-burst">🎉 WINNER! 🎉</div>}
+                {isLossShakeActive && <div className="loss-shake">❌ PUSH/LOSS ❌</div>}
+                
+                {isBettingPhase ? (
+                    <>
+                        <h2 className="table-message big-message">{message}</h2>
+                        {/* Chip Stack Area (Click to clear bet) */}
+                       <div className="chip-stack-area" onClick={clearBet}>
+                            {chipsOnTable.map((chip, index) => (
+                            <div
+                             key={index}
+                              className="placed-chip"
+                              style={{
+                              backgroundImage: `url(${chipImage})`,
+                              zIndex: 10 + index,
+                              transform: `translate(${index * 3}px, ${-index * 6}px) rotate(${index * 3}deg)`
+                             }}
+                             >
+                            <span className="chip-value-text">${chip}</span>
+                            </div>
+                             ))}
+                             {betAmount > 0 && <div className="bet-label">${betAmount}</div>}
+                        </div>
+
+                        
+                        {/* DEAL Button */}
+                        <button onClick={handleDeal} className="action-button deal-button" disabled={betAmount === 0}>
+                            Deal
+                        </button>
+                    </>
+                ) : (
+                    <>
+                        {/* Game Status Message */}
+                        <h2 className="table-message">{message}</h2>
+
+                        {/* HIT/STAND/DOUBLE BUTTONS */}
+                        <div className="in-game-actions">
+                            <button onClick={newCard} disabled={!isGameActive} className="action-button hit-button">Hit</button>
+                            <button onClick={stand} disabled={!isGameActive} className="action-button stand-button">Stand</button>
+                            {/* Add Double/Insurance buttons here */}
+                        </div>
+                    </>
+                )}
+            </div>
+
+            {/* CHIP TRAY AND CHIP COUNT */}
+            <div className="chip-tray-area">
+                <div className="chip-buttons">
+    {CHIP_VALUES.map(value => (
+        <button 
+            key={value}
+            onClick={() => handleChipClick(value)}
+            disabled={!isBettingPhase || playerChips < value}
+            className="chip-button"
+            style={{
+                backgroundImage: `url(${chipImage})`
+            }}
+        >
+            <span className="chip-value-text">${value}</span>
+        </button>
+    ))}
 </div>
-            
-            {/* Action Buttons */}
-            <div className="actions">
-                <button onClick={startGame} disabled={isGameActive}>
-                    Start Game
-                </button>
-                <button onClick={newCard} disabled={!isGameActive}>
-                    Hit (New Card)
-                </button>
-                <button onClick={stand} disabled={!isGameActive}>
-                    Stand
-                </button>
+                {/* Player total chips at the bottom right */}
+                <div className="player-total-chips">Balance$:{playerChips}</div>
             </div>
         </div>
     );
