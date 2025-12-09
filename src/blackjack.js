@@ -160,7 +160,7 @@ function Blackjack() {
             {/* --- NEW: Party Burst Element --- */}
     {isWinBurstActive && (
         <div className="win-burst">
-            🎉 YOU WIN! 🎉
+            🎉 {message} 🎉
         </div>
     )}
             <p>
