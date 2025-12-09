@@ -1,200 +1,305 @@
-/* myapp4/src/index.css */
+
 body {
     margin: 0;
+    padding: 0;
     font-family: Arial, sans-serif;
-    background-color: #0d2c1c; /* Dark green felt color */
-    color: #fff;
-    text-align: center;
-    padding-top: 50px;
+
+    background-image: url('assets/Blackjack_board.jpeg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+
+    display: flex;              /* enable flexbox */
+    justify-content: center;    /* centers horizontally */
+    align-items: center;        /* centers vertically */
+    min-height: 100vh;          /* so the body fills full screen */
+
+    color: white;
 }
+
+
 
 .blackjack-container {
-    max-width: 600px;
-    margin: 0 auto;
-    padding: 30px;
-    border-radius: 15px;
-    background-color: #1a4f32; /* Slightly lighter felt */
-    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+    width: 80vw;       /* or 70vw depending on preference */
+    max-width: 1200px; /* prevents too wide on large screens */
+    height: 90vh;      /* or 100vh if you want full height */
+    padding: 20px;
+
+    background-color: #063411e1;
+    box-shadow: inset 0 0 80px rgba(0,0,0,0.6);
+    border-radius: 20px;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
 }
 
-h1 {
-    font-size: 2.5em;
-    color: #ffcc00; /* Gold color for heading */
-    margin-bottom: 20px;
-}
 
-h2 {
-    font-size: 1.5em;
-    margin-top: 30px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-    padding-bottom: 10px;
-}
-
-hr {
-    border: 0;
-    height: 1px;
-    background-image: linear-gradient(to right, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0));
-    margin: 30px 0;
-}
-
-/* myapp4/src/index.css (Add to the file above) */
-
-.actions button {
-    padding: 10px 20px;
-    margin: 5px;
-    border: none;
-    border-radius: 5px;
-    font-size: 1em;
-    font-weight: bold;
-    cursor: pointer;
-    transition: background-color 0.2s, transform 0.1s;
-}
-
-/* Specific styling for the Hit button */
-.actions button:nth-child(2) { 
-    background-color: #007bff; /* Blue */
-    color: white;
-}
-.actions button:nth-child(2):hover:not(:disabled) {
-    background-color: #0056b3;
-    transform: translateY(-2px);
-}
-
-/* Specific styling for the Stand button */
-.actions button:nth-child(3) { 
-    background-color: #28a745; /* Green */
-    color: white;
-}
-.actions button:nth-child(3):hover:not(:disabled) {
-    background-color: #1e7e34;
-    transform: translateY(-2px);
-}
-
-/* Disabled State */
-.actions button:disabled {
-    background-color: #555;
-    color: #bbb;
-    cursor: not-allowed;
-    opacity: 0.7;
-}
-
-/* myapp4/src/index.css (Add to the file above) */
-
-.card-tile {
-    display: inline-block;
-    width: 40px;
-    height: 60px;
-    line-height: 60px;
+.table-top {
+    width: 100%;
     text-align: center;
-    background-color: white;
-    color: black;
-    border: 1px solid #333;
-    border-radius: 5px;
-    margin: 0 5px;
-    font-size: 1.2em;
-    font-weight: bold;
-    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.4);
+    padding-top: 10px;
 }
 
-/* Style for the hidden dealer card */
-.card-tile:has(span:only-child) { /* Targets the hidden '?' card */
-    background-color: #555;
+.logo {
+    font-size: 42px;
+    font-weight: 900;
+    letter-spacing: 3px;
+    color: #fff3c4;
+    text-shadow: 2px 2px 8px black;
+}
+
+
+.dealer-area,
+.player-area {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.sum-display {
+    font-size: 30px;
+    margin-bottom: 10px;
+    text-shadow: 1px 1px 5px black;
+}
+
+.hand-display {
+    display: flex;
+    gap: 10px;
+}
+
+
+
+.card-tile {
+    width: 55px;
+    height: 80px;
+    border-radius: 8px;
+    background: white;
+    color: black;
+    font-size: 22px;
+    font-weight: 900;
+    border: 2px solid #333;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.5);
+
+    /* animation support */
+    position: relative;
+    transition: 0.2s;
+}
+
+/* Animation on card draw */
+.card-drawn-animation {
+    animation: slideIn 0.4s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-30px) scale(0.8);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+
+
+.center-table-actions {
+    text-align: center;
+}
+
+.table-message {
+    font-size: 28px;
+    margin-bottom: 15px;
+    text-shadow: 1px 1px 6px black;
+}
+
+.big-message {
+    font-size: 36px;
+}
+
+
+
+.action-button {
+    padding: 12px 20px;
+    font-size: 20px;
+    font-weight: bold;
+    border-radius: 10px;
+    cursor: pointer;
+    border: none;
+    margin: 5px;
+    transition: 0.15s;
+}
+
+.action-button:hover:not(:disabled) {
+    transform: translateY(-3px);
+}
+
+
+.hit-button {
+    background: hsla(210, 69%, 53%, 0.817);
+    color: rgb(215, 215, 215);
+    border-radius: 10px;
+}
+.hit-button:hover { background: #006edc; }
+
+/* Stand */
+.stand-button {
+    background: #28a745;
     color: white;
 }
+.stand-button:hover { background: #1e7e34; }
 
-/* Style for the outcome message */
-.blackjack-container > p:first-child {
-    font-size: 1.8em;
-    font-weight: 900;
-    color: #ff0000; /* Red for emphasis */
-    padding: 10px;
+/* Deal */
+.deal-button {
+    background: #e20b0b;
+    color: white;
+    padding: 15px 40px;
+    font-size: 24px;
+    border-radius: 50px;
+}
+.deal-button:hover { background: black; }
+
+
+.action-button:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
 }
 
-/* myapp4/src/index.css (Add these styles) */
 
-/* Base style for card tiles (ensure it's positioned for animation) */
-.card-tile {
-    /* ... existing card-tile styles ... */
-    position: relative; /* Essential for 'transform' animation */
-    /* Add a transition for smooth changes, like when changing its color or size */
-    transition: all 0.3s ease-out; 
-    opacity: 1; /* Default visible state */
-}
-
-/* Animation for a newly drawn card */
-.card-drawn-animation {
-    animation: slideInCard 0.5s ease-out forwards;
-}
-
-@keyframes slideInCard {
-    from {
-        opacity: 0;
-        transform: translateX(50px) scale(0.8); /* Start off-screen right, slightly smaller */
-    }
-    to {
-        opacity: 1;
-        transform: translateX(0) scale(1); /* End in its normal position */
-    }
-}
-
-/* You might want a subtle animation for the overall message change too */
-.blackjack-container > p:nth-child(2) {
-    /* ... existing message styles ... */
-    animation: fadeInMessage 0.8s ease-out;
-}
-
-@keyframes fadeInMessage {
-    from {
-        opacity: 0;
-        transform: translateY(-10px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-/* myapp4/src/index.css (Add these styles) */
-
-/* Style for the Win Burst container */
 .win-burst {
-    position: absolute; /* Position it relative to the container */
-    top: 50%;
+    position: absolute;
+    top: 40%;
     left: 50%;
     transform: translate(-50%, -50%);
-    z-index: 100;
-    font-size: 3em;
+    padding: 25px 50px;
+    font-size: 42px;
+    background: rgba(0, 0, 0, 0.7);
+    color: #ffeb3b;
+    border: 5px solid gold;
+    border-radius: 15px;
+    box-shadow: 0 0 40px gold;
+
+    animation: burstAnim 1.5s ease-out forwards;
+}
+
+@keyframes burstAnim {
+    0% { opacity: 0; transform: translate(-50%, -50%) scale(0.2); }
+    50% { opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
+    100% { opacity: 0; transform: translate(-50%, -50%) scale(1.4); }
+}
+
+.loss-shake {
+    font-size: 36px;
+    color: red;
+    animation: shake 0.4s ease-in-out infinite;
+    font-weight: 700;
+}
+
+@keyframes shake {
+    0% { transform: translateX(0px); }
+    25% { transform: translateX(-6px); }
+    50% { transform: translateX(6px); }
+    75% { transform: translateX(-6px); }
+    100% { transform: translateX(0px); }
+}
+
+
+.chip-stack-area {
+    margin-top: 10px;
+    min-height: 80px;
+    display: flex;
+    position: relative;
+    cursor: pointer;
+}
+
+.placed-chip {
+    width: 55px;
+    height: 55px;
+    border-radius: 50%;
+    background: radial-gradient(circle, white 30%, #ccc 60%, #888);
+    border: 3px solid black;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 20px;
+}
+
+
+
+.chip-tray-area {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.chip-buttons {
+    display: flex;
+   
+}
+
+
+.player-total-chips {
+    font-size: 32px;
+    font-weight: bold;
+    text-shadow: 1px 1px 5px black;
+    font-style: italic;
+    color: #1e90ff;
+}
+
+
+.chip-button,
+.placed-chip {
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    position: relative;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0;
+    overflow: hidden;
+}
+
+.chip-button img,
+.placed-chip img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;  /* forces full fill */
+}
+
+
+.chip-button {
+    width: 70px;
+    height: 70px;
+    transition: 0.25s;
+}
+
+.chip-button:hover:not(:disabled) {
+    transform: translateY(-6px) scale(1.08);
+}
+
+.placed-chip {
+    width: 70px;
+    height: 70px;
+    position: absolute;
+    transition: transform 0.25s ease-out;
+}
+
+.chip-value-text {
+    font-size: 20px;
     font-weight: 900;
-    color: #ffcc00; /* Gold */
-    background-color: rgba(0, 0, 0, 0.7);
-    padding: 20px 40px;
-    border-radius: 10px;
-    border: 5px solid #ff00ff; /* Pink border */
-    box-shadow: 0 0 30px #ff00ff;
-    
-    /* Apply the animation */
-    animation: burstPop 1.5s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
+    color: gold;
+    text-shadow: 1px 1px 4px black;
+    pointer-events: none;
 }
 
-/* IMPORTANT: Ensure the parent container can position the burst correctly */
-.blackjack-container {
-    /* ... existing styles ... */
-    position: relative; /* REQUIRED */
-    overflow: hidden; /* Keeps the animation within the container bounds */
-}
-
-
-@keyframes burstPop {
-    0% {
-        opacity: 0;
-        transform: translate(-50%, -50%) scale(0.1) rotate(0deg);
-    }
-    50% {
-        opacity: 1;
-        transform: translate(-50%, -50%) scale(1.1) rotate(5deg);
-    }
-    100% {
-        opacity: 0;
-        transform: translate(-50%, -50%) scale(1.5) rotate(-5deg);
-    }
-}
